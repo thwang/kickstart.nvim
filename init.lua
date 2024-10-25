@@ -967,17 +967,34 @@ require('lazy').setup({
     end,
   },
 
-  -- {
-  --   'ThePrimeagen/harpoon',
-  --   branch = 'harpoon2',
-  --   dependencies = { 'nvim-lua/plenary.nvim' },
-  -- },
   {
     'theprimeagen/harpoon',
     branch = 'harpoon2',
     dependencies = { 'nvim-lua/plenary.nvim' },
     config = function()
-      require('harpoon'):setup()
+      local harpoon = require 'harpoon'
+
+      harpoon:setup {
+        settings = {
+          save_on_toggle = true,
+        },
+      }
+
+      local function set_navigation(number)
+        vim.keymap.set('n', '<leader>' .. number, function()
+          harpoon:list():select(number)
+        end, { desc = 'Go to harpoon file ' .. number })
+      end
+
+      set_navigation(1)
+      set_navigation(2)
+      set_navigation(3)
+      set_navigation(4)
+      set_navigation(5)
+      set_navigation(6)
+      set_navigation(7)
+      set_navigation(8)
+      set_navigation(9)
     end,
     keys = {
       {
@@ -994,41 +1011,6 @@ require('lazy').setup({
           harpoon.ui:toggle_quick_menu(harpoon:list())
         end,
         desc = 'harpoon quick menu',
-      },
-      {
-        '<leader>1',
-        function()
-          require('harpoon'):list():select(1)
-        end,
-        desc = 'harpoon to file 1',
-      },
-      {
-        '<leader>2',
-        function()
-          require('harpoon'):list():select(2)
-        end,
-        desc = 'harpoon to file 2',
-      },
-      {
-        '<leader>3',
-        function()
-          require('harpoon'):list():select(3)
-        end,
-        desc = 'harpoon to file 3',
-      },
-      {
-        '<leader>4',
-        function()
-          require('harpoon'):list():select(4)
-        end,
-        desc = 'harpoon to file 4',
-      },
-      {
-        '<leader>5',
-        function()
-          require('harpoon'):list():select(5)
-        end,
-        desc = 'harpoon to file 5',
       },
     },
   },
