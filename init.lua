@@ -247,13 +247,22 @@ require('lazy').setup({
   'tpope/vim-sleuth',
   'tpope/vim-fugitive',
 
+  -- dim inactive portions of code while editing
+  {
+    'folke/twilight.nvim',
+    opts = {
+      vim.keymap.set('n', '<leader>ttw', function()
+        require('twilight').toggle()
+      end, { desc = '[T]oggle [T][w]ilight' }),
+    },
+  },
+  -- },
   -- NOTE: Plugins can also be added by using a table,
   -- with the first argument being the link and the following
   -- keys can be used to configure plugin behavior/loading/etc.
   --
   -- Use `opts = {}` to force a plugin to be loaded.
   --
-
   -- Here is a more advanced example where we pass configuration
   -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
   --    require('gitsigns').setup({ ... })
@@ -1056,6 +1065,9 @@ require('lazy').setup({
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+
+  -- CUSTOM PLUGINS
+  require 'custom.plugins.neotest',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
