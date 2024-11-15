@@ -198,10 +198,28 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<leader>ww', ':w<cr>', { desc = 'save current files' })
 
 -- remap escape while in inesrt mode
-vim.keymap.set('i', '<leader>e', '<esc>')
+vim.keymap.set('i', '<leader>e', '<esc>', { desc = '[E]scape from insert mode' })
 
 -- -- " reopen prev by double tapping leader. can do this default with Ctrl+^
 vim.keymap.set('n', '<leader><leader>', ':e#<cr>', { desc = 'toggle prev buffer' })
+
+vim.keymap.set('n', '<leader>yf', function()
+  vim.cmd 'let @+ = expand("%:p")'
+  -- Mon Nov 11 22:02:44 EST 2024
+  -- this was an attempt to get the relative file path from the project root but i need to better understand how to set the project root
+  -- vim.cmd 'let @+ = expand("%:p:h") . "/" . expand("%:t")'
+  print 'Copied to full filepath to clipboard'
+end, { desc = '[Y]ank [F]ile path to Sys clipboard' })
+
+vim.keymap.set('n', '<leader>yfn', function()
+  local filepath = vim.fn.expand '%:t' .. ':' .. vim.fn.line '.'
+  vim.fn.setreg('+', filepath) -- Copy to system clipboard
+  print('Copied to clipboard: ' .. filepath)
+end, { desc = '[Y]ank [F]ile path w/ [n]umber to Sys clipboard' })
+
+vim.keymap.set('n', '<leader>dt', function()
+  vim.cmd 'r! date'
+end, { desc = 'Insert [d]ate and [t]ime from system' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -247,6 +265,15 @@ require('lazy').setup({
   'tpope/vim-sleuth',
   'tpope/vim-fugitive',
 
+  -- persist function signature when scrollin
+  {
+    'nvim-treesitter/nvim-treesitter-context',
+    opts = {
+      vim.keymap.set('n', '[c', function()
+        require('treesitter-context').go_to_context(vim.v.count1)
+      end, { silent = true }),
+    },
+  },
   -- dim inactive portions of code while editing
   {
     'folke/twilight.nvim',
@@ -918,7 +945,7 @@ require('lazy').setup({
       vim.g.sonokai_dim_inactive_windows = 1
       vim.cmd.colorscheme 'sonokai'
 
-      -- You can configure highlights by doing something like:
+      -- -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
     end,
   },
@@ -961,15 +988,16 @@ require('lazy').setup({
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
       -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
+      -- statusline.setup { use_icons = vim.g.have_nerd_font }
+      statusline.setup { use_icons = true }
 
       -- You can configure sections in the statusline by overriding their
       -- default behavior. For example, here we set the section for
       -- cursor location to LINE:COLUMN
       ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
+      -- statusline.section_location = function()
+      --   return '%2l:%-2v'
+      -- end
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
