@@ -1,6 +1,4 @@
---[[
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
---]]
+-- (or HTML version): https://neovim.io/doc/user/lua-guide.html
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
@@ -11,15 +9,15 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
--- [[ Setting options ]]
+-- ######################################################################
+-- Setting options
+-- ######################################################################
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
 --  For more options, you can see `:help option-list`
 
 -- Make line numbers default
 vim.opt.number = true
--- You can also add relative line numbers, to help with jumping.
---  Experiment for yourself to see if you like it!
 vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
@@ -79,7 +77,37 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
--- [[ Basic Keymaps ]]
+-- #########################################################################################
+-- START: enable reloading files when they change on disk
+-- #########################################################################################
+vim.opt.autoread = true
+
+local auto_reload_group = vim.api.nvim_create_augroup('auto-reload', { clear = true })
+
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+  desc = 'Check for file changes',
+  group = auto_reload_group,
+  command = 'checktime',
+})
+
+vim.api.nvim_create_autocmd('FileChangedShellPost', {
+  desc = 'Notify when file reloaded',
+  group = auto_reload_group,
+  callback = function()
+    vim.notify('File reloaded because it changed on disk', vim.log.levels.INFO)
+  end,
+})
+-- #########################################################################################
+-- END: enable reloading files when they change on disk
+-- #########################################################################################
+
+-- ######################################################################
+-- END: Setting options
+-- ######################################################################
+
+-- ######################################################################
+-- BASIC KEYMAPS
+-- ######################################################################
 --  See `:help vim.keymap.set()`
 
 -- Clear highlights on search when pressing <Esc> in normal mode
@@ -97,12 +125,6 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
@@ -115,23 +137,32 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- save file with leader ww
 vim.keymap.set('n', '<leader>ww', ':w<cr>', { desc = 'save current files' })
 
--- remap escape while in inesrt mode
-vim.keymap.set('i', '<leader>e', '<esc>', { desc = '[E]scape from insert mode' })
+-- EDIT 12/3/24: seems that this was causing issues with lagginess while in insert mode
+-- -- remap escape while in insert mode
+vim.keymap.set('i', '<C-e>', '<esc>', { desc = '[E]scape from insert mode' })
 
--- -- " reopen prev by double tapping leader. can do this default with Ctrl+^
+--  reopen prev by double tapping leader. can do this default with Ctrl+^
 vim.keymap.set('n', '<leader><leader>', ':e#<cr>', { desc = 'toggle prev buffer' })
 
 vim.keymap.set('n', '<leader>yf', function()
-  vim.cmd 'let @+ = expand("%:p")'
-  -- Mon Nov 11 22:02:44 EST 2024
-  -- this was an attempt to get the relative file path from the project root but i need to better understand how to set the project root
-  -- vim.cmd 'let @+ = expand("%:p:h") . "/" . expand("%:t")'
-  print 'Copied to full filepath to clipboard'
-end, { desc = '[Y]ank [F]ile path to Sys clipboard' })
+  local filepath = vim.fn.expand '%:.' -- Relative path from project root
+  if filepath == '' then
+    filepath = vim.fn.expand '%:p' -- Fallback to full path if no relative path
+    print 'Warning: Using full path instead'
+  end
+  vim.fn.setreg('+', filepath)
+  vim.fn.setreg('"', filepath) -- Also set default register as backup
+  print('Copied to clipboard: ' .. filepath)
+  -- Verify it was set
+  local clipboard_content = vim.fn.getreg '+'
+  if clipboard_content ~= filepath then
+    print 'ERROR: Clipboard content does not match!'
+  end
+end, { desc = '[Y]ank [F]ile path (from root) to Sys clipboard' })
 
 vim.keymap.set('n', '<leader>yfn', function()
-  local filepath = vim.fn.expand '%:t' .. ':' .. vim.fn.line '.'
-  vim.fn.setreg('+', filepath) -- Copy to system clipboard
+  local filepath = vim.fn.expand '%:.' .. ':' .. vim.fn.line '.' -- Relative path from project root with line number
+  vim.fn.setreg('+', filepath)
   print('Copied to clipboard: ' .. filepath)
 end, { desc = '[Y]ank [F]ile path w/ [n]umber to Sys clipboard' })
 
@@ -139,7 +170,13 @@ vim.keymap.set('n', '<leader>dt', function()
   vim.cmd 'r! date'
 end, { desc = 'Insert [d]ate and [t]ime from system' })
 
--- [[ Basic Autocommands ]]
+-- ######################################################################
+-- END: BASIC KEYMAPS
+-- ######################################################################
+
+-- ###################################################################
+-- BASIC AUTOCOMMANDS
+-- ###################################################################
 --  See `:help lua-guide-autocommands`
 
 -- Highlight when yanking (copying) text
@@ -164,8 +201,13 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   end
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
+-- ###################################################################
+-- END: BASIC AUTOCOMMANDS
+-- ###################################################################
 
--- [[ Configure and install plugins ]]
+-- ###################################################################
+-- CONFIGURE AND INSTALL PLUGINS
+-- ###################################################################
 --
 --  To check the current status of your plugins, run
 --    :Lazy
@@ -182,6 +224,15 @@ require('lazy').setup({
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
   'tpope/vim-fugitive',
+  opts = {
+    vim.keymap.set('n', '<leader>gbl', function()
+      if vim.bo.filetype == 'fugitiveblame' then
+        vim.cmd 'q'
+      else
+        vim.cmd.Git 'blame'
+      end
+    end, { silent = true, desc = '[g]it [bl]ame' }),
+  },
 
   -- persist function signature when scrollin
   {
@@ -192,7 +243,7 @@ require('lazy').setup({
       end, { silent = true }),
     },
   },
-  -- dim inactive portions of code while editing
+
   {
     'folke/twilight.nvim',
     opts = {
@@ -357,6 +408,18 @@ require('lazy').setup({
         --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
         --   },
         -- },
+        defaults = {
+          -- layout_strategy = 'vertical',
+          path_display = { 'truncate' },
+          layout_config = {
+            width = 0.99,
+            height = 0.99,
+            preview_width = 0.6,
+          },
+          mappings = {
+            i = { ['<C-p>'] = require('telescope.actions.layout').toggle_preview },
+          },
+        },
         pickers = {
           live_grep = {
             additional_args = function(_)
@@ -862,9 +925,8 @@ require('lazy').setup({
       vim.g.sonokai_better_performance = 1
       vim.g.sonokai_dim_inactive_windows = 1
       vim.cmd.colorscheme 'sonokai'
-
-      -- -- You can configure highlights by doing something like:
-      vim.cmd.hi 'Comment gui=none'
+      vim.cmd.hi 'CursorLine guibg=#5a6477 guifg=NONE' -- Subtle dark background
+      vim.cmd.hi 'Visual guibg=#5a6477 guifg=NONE'
     end,
   },
 
@@ -1002,25 +1064,26 @@ require('lazy').setup({
 
   -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
   --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  --
+  -- ###################################################################
+  -- END CONFIGURE AND INSTALL PLUGINS
+  -- ###################################################################
 
+  -- ####################################################################
   -- CUSTOM PLUGINS
-  require 'custom.plugins.neotest',
+  -- ####################################################################
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
