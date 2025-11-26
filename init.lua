@@ -35,9 +35,6 @@ require('lazy').setup({
   -- Import modular plugin specs
   { import = 'plugins' },
 
-  -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
-
   {
     'folke/twilight.nvim',
     opts = {
@@ -165,17 +162,6 @@ require('lazy').setup({
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
-
-  {
-    'kylechui/nvim-surround',
-    version = '*', -- Use for stability; omit to use `main` branch for the latest features
-    event = 'VeryLazy',
-    config = function()
-      require('nvim-surround').setup {
-        -- Configuration here, or leave empty to use defaults
-      }
-    end,
-  },
 
   { -- Collection of various small independent plugins/modules
     'echasnovski/mini.nvim',
