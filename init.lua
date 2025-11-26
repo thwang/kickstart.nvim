@@ -4,42 +4,7 @@
 -- Load core configuration
 require 'config.options'
 require 'config.keymaps'
-
-local auto_reload_group = vim.api.nvim_create_augroup('auto-reload', { clear = true })
-
-vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
-  desc = 'Check for file changes',
-  group = auto_reload_group,
-  command = 'checktime',
-})
-
-vim.api.nvim_create_autocmd('FileChangedShellPost', {
-  desc = 'Notify when file reloaded',
-  group = auto_reload_group,
-  callback = function()
-    vim.notify('File reloaded because it changed on disk', vim.log.levels.INFO)
-  end,
-})
--- #########################################################################################
--- END: enable reloading files when they change on disk
--- #########################################################################################
-
-
--- ###################################################################
--- BASIC AUTOCOMMANDS
--- ###################################################################
---  See `:help lua-guide-autocommands`
-
--- Highlight when yanking (copying) text
---  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
-vim.api.nvim_create_autocmd('TextYankPost', {
-  desc = 'Highlight when yanking (copying) text',
-  group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-})
+require 'config.autocmds'
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    See `:help lazy.nvim.txt` or https://github.com/folke/lazy.nvim for more info
@@ -52,9 +17,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
   end
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
--- ###################################################################
--- END: BASIC AUTOCOMMANDS
--- ###################################################################
 
 -- ###################################################################
 -- CONFIGURE AND INSTALL PLUGINS
