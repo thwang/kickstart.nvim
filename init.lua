@@ -37,16 +37,6 @@ require('lazy').setup({
 
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
-  'tpope/vim-fugitive',
-  opts = {
-    vim.keymap.set('n', '<leader>gbl', function()
-      if vim.bo.filetype == 'fugitiveblame' then
-        vim.cmd 'q'
-      else
-        vim.cmd.Git 'blame'
-      end
-    end, { silent = true, desc = '[g]it [bl]ame' }),
-  },
 
   {
     'folke/twilight.nvim',
@@ -54,19 +44,6 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>ttw', function()
         require('twilight').toggle()
       end, { desc = '[T]oggle [T][w]ilight' }),
-    },
-  },
-
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
     },
   },
 
