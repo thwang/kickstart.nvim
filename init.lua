@@ -3,6 +3,7 @@
 
 -- Load core configuration
 require 'config.options'
+require 'config.keymaps'
 
 local auto_reload_group = vim.api.nvim_create_augroup('auto-reload', { clear = true })
 
@@ -23,78 +24,6 @@ vim.api.nvim_create_autocmd('FileChangedShellPost', {
 -- END: enable reloading files when they change on disk
 -- #########################################################################################
 
--- ######################################################################
--- END: Setting options
--- ######################################################################
-
--- ######################################################################
--- BASIC KEYMAPS
--- ######################################################################
---  See `:help vim.keymap.set()`
-
--- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
-
--- Diagnostic keymaps
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
-
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
--- Keybinds to make split navigation easier.
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
-vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
-vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
-vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
-vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- save file with leader ww
-vim.keymap.set('n', '<leader>ww', ':w<cr>', { desc = 'save current files' })
-
--- EDIT 12/3/24: seems that this was causing issues with lagginess while in insert mode
--- -- remap escape while in insert mode
-vim.keymap.set('i', '<C-e>', '<esc>', { desc = '[E]scape from insert mode' })
-
---  reopen prev by double tapping leader. can do this default with Ctrl+^
-vim.keymap.set('n', '<leader><leader>', ':e#<cr>', { desc = 'toggle prev buffer' })
-
-vim.keymap.set('n', '<leader>yf', function()
-  local filepath = vim.fn.expand '%:.' -- Relative path from project root
-  if filepath == '' then
-    filepath = vim.fn.expand '%:p' -- Fallback to full path if no relative path
-    print 'Warning: Using full path instead'
-  end
-  vim.fn.setreg('+', filepath)
-  vim.fn.setreg('"', filepath) -- Also set default register as backup
-  print('Copied to clipboard: ' .. filepath)
-  -- Verify it was set
-  local clipboard_content = vim.fn.getreg '+'
-  if clipboard_content ~= filepath then
-    print 'ERROR: Clipboard content does not match!'
-  end
-end, { desc = '[Y]ank [F]ile path (from root) to Sys clipboard' })
-
-vim.keymap.set('n', '<leader>yfn', function()
-  local filepath = vim.fn.expand '%:.' .. ':' .. vim.fn.line '.' -- Relative path from project root with line number
-  vim.fn.setreg('+', filepath)
-  print('Copied to clipboard: ' .. filepath)
-end, { desc = '[Y]ank [F]ile path w/ [n]umber to Sys clipboard' })
-
-vim.keymap.set('n', '<leader>dt', function()
-  vim.cmd 'r! date'
-end, { desc = 'Insert [d]ate and [t]ime from system' })
-
--- ######################################################################
--- END: BASIC KEYMAPS
--- ######################################################################
 
 -- ###################################################################
 -- BASIC AUTOCOMMANDS
