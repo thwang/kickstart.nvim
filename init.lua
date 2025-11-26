@@ -35,18 +35,6 @@ require('lazy').setup({
   -- Import modular plugin specs
   { import = 'plugins' },
 
-  {
-    'folke/twilight.nvim',
-    opts = {
-      vim.keymap.set('n', '<leader>ttw', function()
-        require('twilight').toggle()
-      end, { desc = '[T]oggle [T][w]ilight' }),
-    },
-  },
-
-  -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
-
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
